@@ -11,7 +11,7 @@ def read_pdf(pdf_path: str) -> str:
     :return: Extracted text from the PDF as a string.
     """
 
-    print(pdf_path)
+    # print(pdf_path)
     pdf_as_str = ""
 
     try:
@@ -91,12 +91,9 @@ def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str ="") -> No
 
             # Add prefix if the PDF link is relative
 
-            pdf_link = pdf_link_prefix + "\\" + pdf_link.lstrip("\\")  # Remove leading backslash
-
+            pdf_link = pdf_link_prefix + "\\" + pdf_link.lstrip("\\")
             print(pdf_link)
 
-            # Read the PDF content
-            # pdf_link = r"C:\Users\670336256\Desktop\2021A0117.pdf"  # TODO usunac
             pdf_text = read_pdf(pdf_link)
 
             # Extract the document code from the PDF text
@@ -116,13 +113,9 @@ if __name__ == '__main__':
 
     # Main task
 
-    pdf_link_prefix = r"\\lux.intra.lighting.com\PL-PIL001\TWWT-Box1\Obsługa celna\CE"
-    excel_file = r"X:\TWWT-Box1\Obsługa celna\CE\Lista kodów.xlsx"  # plik docelowy (z dysku)
+    pdf_link_prefix = r""  # Here type PDF prefix file if needed
+    excel_file = r""  # Here type path to the excel file (Necessary)
     process_excel_and_pdfs(excel_file, pdf_link_prefix)
 
-    # Testing in local
-    #
-    # excel_file = r"C:\Users\670336256\Desktop\ExcelTestFile.xlsx"  # plik lokalny
-    # pdf_link_prefix = r"C:\Users\670336256\Desktop"
-    # process_excel_and_pdfs(excel_file, pdf_link_prefix)
+
 
