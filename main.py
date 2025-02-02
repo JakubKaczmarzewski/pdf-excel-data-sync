@@ -4,6 +4,7 @@ import pypdf
 import os
 
 
+
 def read_pdf(pdf_path: str) -> str:
     """
     Read data from a PDF file and store it as a single string.
@@ -76,7 +77,7 @@ def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str ="") -> No
     :param pdf_link_prefix: The prefix to be added to PDF links if they are partial.
     :return: None
     """
-
+    print(pdf_link_prefix)
     wb_obj = openpyxl.load_workbook(excel_file_path)
     active_sheet = wb_obj.active
     active_sheet.iter_rows(3)
@@ -91,10 +92,11 @@ def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str ="") -> No
 
             # Add prefix if the PDF link is relative
 
-            pdf_link = pdf_link_prefix + "\\" + pdf_link.lstrip("\\")
-            print(pdf_link)
+            # pdf_link = pdf_link_prefix + "\\" + pdf_link.lstrip("\\")
+            full_path = os.path.join(pdf_link_prefix, pdf_link.lstrip("\\"))
+            # print(full_path)
 
-            pdf_text = read_pdf(pdf_link)
+            pdf_text = read_pdf(full_path)
 
             # Extract the document code from the PDF text
             document_code = extract_document_code(pdf_text)
@@ -111,11 +113,14 @@ def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str ="") -> No
 
 if __name__ == '__main__':
 
+
     # Main task
 
-    pdf_link_prefix = r""  # Here type PDF prefix file if needed
-    excel_file = r""  # Here type path to the excel file (Necessary)
-    process_excel_and_pdfs(excel_file, pdf_link_prefix)
+    # pdf_link_prefix = r""  # Here type PDF prefix file if needed
+    # excel_file = r""  # Here type path to the excel file (Necessary)
+    # process_excel_and_pdfs(excel_file, pdf_link_prefix)
+
+
 
 
 
