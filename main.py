@@ -2,6 +2,7 @@ import re
 import openpyxl
 import pypdf
 import os
+from urllib.parse import unquote
 
 
 
@@ -69,32 +70,37 @@ def extract_document_code(text: str, search_pattern: list = ("Document No.:", "I
     return None
 
 
-def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str ="") -> None:
+def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str = "", start_row: int = 2, end_row=None) -> None:
     """
     Process the Excel file and for each row, extract data from the PDF linked in the Excel.
     Write the extracted document code into the next column of the same row (column need to exist and have header).
     :param excel_file_path: Path to the Excel file.
     :param pdf_link_prefix: The prefix to be added to PDF links if they are partial.
+    :param start_row: Number of the row where program starts to process, value 2 by default.
+    :param end_row: Number of the row where program ends, if not specified by user program process whole file.
     :return: None
     """
     print(pdf_link_prefix)
     wb_obj = openpyxl.load_workbook(excel_file_path)
     active_sheet = wb_obj.active
-    active_sheet.iter_rows(3)
 
-    # Iterate over the rows in the Excel file (starting from row 2 to skip the header)
-    for row in active_sheet.iter_rows(min_row=2, max_row=active_sheet.max_row, min_col=1,
-                                      max_col=active_sheet.max_column):
+    if end_row is None:
+        end_row = active_sheet.max_row
+
+    # Iterate over the rows in the Excel file
+    for row in active_sheet.iter_rows(min_row=start_row, max_row=end_row, min_col=1, max_col=active_sheet.max_column):
         product_code = row[0].value  # Assuming the product code is in column A
         pdf_link = row[1].hyperlink.target if row[1].hyperlink else None  # Extract the hyperlink from column B
         if pdf_link:  # Only process if there's a valid hyperlink
             print(f"Processing PDF for Product Code: {product_code} - {pdf_link}")
 
-            # Add prefix if the PDF link is relative
+            # Decode the URL-encoded characters in the file path
+            decoded_pdf_link = unquote(pdf_link)
 
-            # pdf_link = pdf_link_prefix + "\\" + pdf_link.lstrip("\\")
-            full_path = os.path.join(pdf_link_prefix, pdf_link.lstrip("\\"))
-            # print(full_path)
+            # Join the prefix and the decoded path
+            full_path = os.path.join(pdf_link_prefix, decoded_pdf_link.lstrip("\\/"))
+
+            print(f"Decoded and full path: {full_path}")
 
             pdf_text = read_pdf(full_path)
 
@@ -107,13 +113,13 @@ def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str ="") -> No
                 # Write the document code to the next column (C)
                 row[2].value = document_code
 
-        # Save the updated Excel file after processing
-        wb_obj.save(f"updated_{os.path.basename(excel_file_path)}")
+    # Save the updated Excel file after processing
+    wb_obj.save(f"updated_{os.path.basename(excel_file_path)}")
 
 
 if __name__ == '__main__':
 
-
+    pass
     # Main task
 
     # pdf_link_prefix = r""  # Here type PDF prefix file if needed
