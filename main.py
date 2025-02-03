@@ -3,7 +3,9 @@ import openpyxl
 import pypdf
 import os
 from urllib.parse import unquote
+import tabula
 
+# tablua-py and camelot -> packs to extract data from pdf tables.
 
 
 def read_pdf(pdf_path: str) -> str:
@@ -70,6 +72,18 @@ def extract_document_code(text: str, search_pattern: list = ("Document No.:", "I
     return None
 
 
+def extract_product_codes(pdf_path: str, column_name: str) -> None:
+    """
+    Look for tables in PDF file and extract product codes
+
+    Using tabula module function searching for tables in PDF file, then extract product codes.
+    :param pdf_path: Total path to the PDF file to process.
+    :param column_name: Name of the column where product codes are located.
+    :return: None
+    """
+    pass
+
+
 def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str = "", start_row: int = 2, end_row=None) -> None:
     """
     Process the Excel file and for each row, extract data from the PDF linked in the Excel.
@@ -119,13 +133,18 @@ def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str = "", star
 
 if __name__ == '__main__':
 
-    pass
+
     # Main task
 
     # pdf_link_prefix = r""  # Here type PDF prefix file if needed
     # excel_file = r""  # Here type path to the excel file (Necessary)
     # process_excel_and_pdfs(excel_file, pdf_link_prefix)
 
+    pdf_link_prefix = r"\\lux.intra.lighting.com\PL-PIL001\TWWT-Box1\Obsługa celna\CE"
+
+    excel_file = r"X:\TWWT-Box1\Obsługa celna\CE\Lista kodów.xlsx"  # plik docelowy (z dysku)
+
+    process_excel_and_pdfs(excel_file, pdf_link_prefix)
 
 
 

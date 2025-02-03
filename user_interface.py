@@ -11,7 +11,11 @@ import main
 # 4 Wyświetlanie instrukcji po kliknieciu w instrukcje
 # 5 Przycisk do uruchomienia całej aplikacji
 
-def show_instruction():
+def show_instruction() -> None:
+    """
+    Print instruction text on user's screen.
+    :return: None
+    """
     instruction_text = """
     Program User Manual:
 
@@ -27,7 +31,12 @@ def show_instruction():
     messagebox.showinfo("How to use this app", instruction_text)
 
 
-def start_process():
+def start_process() -> None:
+    """
+    Read user's input from the tkinter screen and run whole app.
+
+    :return: None
+    """
     # Pobieranie danych z pól tekstowych
     excel_path = excel_entry.get()
     pdf_prefix_path = pdf_entry.get()
@@ -57,37 +66,37 @@ def start_process():
         messagebox.showerror("Error", f"An error occurred: {e}")
 
 
+
 main_window = tk.Tk()
 
 main_window.title("Process Excel and Pdf")
 main_window.geometry('640x480-8-200')
 
 instruction_button = tk.Button(main_window, text="?", command=show_instruction)
-instruction_button.grid(row = 0, column = 3, sticky = tk.E)
+instruction_button.grid(row=0, column=3, sticky=tk.E)
 
 excel_label = tk.Label(main_window, text="1.Excel File path")
-excel_label.grid(row = 1, column = 0)
+excel_label.grid(row=1, column=0)
 excel_entry = tk.Entry(main_window, width=40)
-excel_entry.grid(row = 1, column = 1)
+excel_entry.grid(row=1, column=1)
 
 pdf_label = tk.Label(main_window, text="2.PDF prefix path")
-pdf_label.grid(row = 2, column = 0)
+pdf_label.grid(row=2, column=0)
 pdf_entry = tk.Entry(main_window, width=40)
-pdf_entry.grid(row = 2, column = 1)
+pdf_entry.grid(row=2, column=1)
 
 col_start = tk.Label(main_window, text="3.Starting column")
-col_start.grid(row = 3, column = 0)
+col_start.grid(row=3, column=0)
 
 col_start_entry = tk.Entry(main_window, width=40)
-col_start_entry.grid(row = 3, column = 1)
+col_start_entry.grid(row=3, column=1)
 
 col_end = tk.Label(main_window, text="4.Ending column")
-col_end.grid(row = 4, column = 0)
+col_end.grid(row=4, column=0)
 col_end_entry = tk.Entry(main_window, width=40)
-col_end_entry.grid(row = 4, column = 1)
+col_end_entry.grid(row=4, column=1)
 
-run_button = tk.Button(main_window, text="Start processing",command=start_process)
-run_button.grid(row = 5, column = 3, sticky = tk.S)
-
+run_button = tk.Button(main_window, text="Start processing", command=start_process)
+run_button.grid(row=5, column=3, sticky=tk.S)
 
 main_window.mainloop()
