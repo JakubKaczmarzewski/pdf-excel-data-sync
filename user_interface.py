@@ -1,15 +1,8 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox
 import main
 
-
-# Cele interface'u:
-# 1 Możliwość wpisywania ścieżki do pliku excela
-# 2 Możliwość wpisywania przedrostku do pliku PDF
-# 3 Możliwość ustawienia startu oraz limitu przetwarzanych column w excelu
-                                        # (zmiana w pliku main)
-# 4 Wyświetlanie instrukcji po kliknieciu w instrukcje
-# 5 Przycisk do uruchomienia całej aplikacji
 
 def show_instruction() -> None:
     """
@@ -37,13 +30,12 @@ def start_process() -> None:
 
     :return: None
     """
-    # Pobieranie danych z pól tekstowych
+    # Read users input
     excel_path = excel_entry.get()
     pdf_prefix_path = pdf_entry.get()
     row_to_start = col_start_entry.get()
     row_to_stop = col_end_entry.get()
 
-    # Sprawdź, czy podano niezbędne dane
     if not excel_path:
         messagebox.showerror("Error", "Excel file path is required.")
         return
@@ -66,37 +58,96 @@ def start_process() -> None:
         messagebox.showerror("Error", f"An error occurred: {e}")
 
 
+def start_process_from_folder() -> None:
+
+    # Read users input
+    folder_path = file_path_entry.get()
+    excel_path = process_excel_entry.get()
+    excel_path_to_save = save_excel_entry.get()
+
+    if not folder_path and not excel_path:
+        messagebox.showerror("Error", "Folder path and Excel file path are required.")
+        return
+
+    if not save_excel_entry.get():
+        excel_path_to_save = excel_path
+        print(f"Test {excel_path_to_save}")
+
+    print(excel_path_to_save)
+
+    # Setting up arguments for function
+
+    kwargs = {"file_path": folder_path}
+
+    kwargs["process_excel_path"] = excel_path
+    if excel_path_to_save:
+        kwargs["excel_save_path"] = excel_path_to_save
+
+    try:
+        main.process_folder_write_pdfs_data_to_excel(**kwargs)
+        messagebox.showinfo("Success", "Processing completed successfully.")
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {e}")
+
 
 main_window = tk.Tk()
+main_window.title("Process Excel and PDF")
+main_window.geometry('700x550')
 
-main_window.title("Process Excel and Pdf")
-main_window.geometry('640x480-8-200')
+# Frame: Process Excel Section
+excel_frame = ttk.LabelFrame(main_window, text="Process Excel and write Document codes", padding=(10, 10))
+excel_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
-instruction_button = tk.Button(main_window, text="?", command=show_instruction)
-instruction_button.grid(row=0, column=3, sticky=tk.E)
+excel_label = ttk.Label(excel_frame, text="Excel File Path:")
+excel_label.grid(row=0, column=0, sticky="w", pady=5)
+excel_entry = ttk.Entry(excel_frame, width=50)
+excel_entry.grid(row=0, column=1, pady=5)
 
-excel_label = tk.Label(main_window, text="1.Excel File path")
-excel_label.grid(row=1, column=0)
-excel_entry = tk.Entry(main_window, width=40)
-excel_entry.grid(row=1, column=1)
+pdf_label = ttk.Label(excel_frame, text="PDF Prefix Path:")
+pdf_label.grid(row=1, column=0, sticky="w", pady=5)
+pdf_entry = ttk.Entry(excel_frame, width=50)
+pdf_entry.grid(row=1, column=1, pady=5)
 
-pdf_label = tk.Label(main_window, text="2.PDF prefix path")
-pdf_label.grid(row=2, column=0)
-pdf_entry = tk.Entry(main_window, width=40)
-pdf_entry.grid(row=2, column=1)
+col_start_label = ttk.Label(excel_frame, text="Starting Column:")
+col_start_label.grid(row=2, column=0, sticky="w", pady=5)
+col_start_entry = ttk.Entry(excel_frame, width=50)
+col_start_entry.grid(row=2, column=1, pady=5)
 
-col_start = tk.Label(main_window, text="3.Starting column")
-col_start.grid(row=3, column=0)
+col_end_label = ttk.Label(excel_frame, text="Ending Column:")
+col_end_label.grid(row=3, column=0, sticky="w", pady=5)
+col_end_entry = ttk.Entry(excel_frame, width=50)
+col_end_entry.grid(row=3, column=1, pady=5)
 
-col_start_entry = tk.Entry(main_window, width=40)
-col_start_entry.grid(row=3, column=1)
+run_button = ttk.Button(excel_frame, text="Start Processing", command=start_process)
+run_button.grid(row=4, column=0, columnspan=2, pady=10, sticky='w')
 
-col_end = tk.Label(main_window, text="4.Ending column")
-col_end.grid(row=4, column=0)
-col_end_entry = tk.Entry(main_window, width=40)
-col_end_entry.grid(row=4, column=1)
+# Frame: Process File Section
+file_frame = ttk.LabelFrame(main_window, text="Process from file and write all data to Excel", padding=(10, 10))
+file_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
 
-run_button = tk.Button(main_window, text="Start processing", command=start_process)
-run_button.grid(row=5, column=3, sticky=tk.S)
+file_path_label = ttk.Label(file_frame, text="File Path:")
+file_path_label.grid(row=0, column=0, sticky="w", pady=5)
+file_path_entry = ttk.Entry(file_frame, width=50)
+file_path_entry.grid(row=0, column=1, pady=5)
+
+process_excel_label = ttk.Label(file_frame, text="Path to Excel to \n process:")
+process_excel_label.grid(row=1, column=0, sticky="w", pady=5)
+process_excel_entry = ttk.Entry(file_frame, width=50)
+process_excel_entry.grid(row=1, column=1, pady=5)
+
+save_excel_label = ttk.Label(file_frame, text="Path to save\n Excel changes:")
+save_excel_label.grid(row=2, column=0, sticky="w", pady=5)
+save_excel_entry = ttk.Entry(file_frame, width=50)
+save_excel_entry.grid(row=2, column=1, pady=5)
+
+file_run_button = ttk.Button(file_frame, text="Start Processing", command=start_process_from_folder)
+file_run_button.grid(row=3, column=0, columnspan=2, pady=10, sticky='w')
+
+# Instruction frame
+instruction_frame = ttk.LabelFrame(main_window, text="Instruction", padding=(10, 10))
+instruction_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+
+instruction_button = ttk.Button(instruction_frame, text="How to Use", command=show_instruction)
+instruction_button.grid(row=0, column=0)
 
 main_window.mainloop()
