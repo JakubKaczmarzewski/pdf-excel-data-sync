@@ -8,9 +8,6 @@ from openpyxl.reader.excel import load_workbook
 import tabula
 
 
-# tablua-py and camelot -> packs to extract data from pdf tables.
-
-
 def create_full_path(path_prefix: str, filename: str) -> str:
     """Creating and returning full path to the file. Joining `path_prefix` with `filename`"""
 
@@ -177,14 +174,14 @@ def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str = "", star
     return logs
 
 
-def process_folder_write_pdfs_data_to_excel(file_path, excel_save_path):
-    """Open file read all pdf files in it, for each one extract data and write it to Excel file, after that move file.
+def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: str, excel_save_path: str = None):
+    """Open folder read all pdf files in it, for each one extract data and write it to Excel file, after that move file.
 
 
     """
     #  Load Excel file to write data
-    excel_save_path = unquote(excel_save_path)
-    excel_to_write = openpyxl.load_workbook(excel_save_path)
+    process_excel_path = unquote(process_excel_path)
+    excel_to_write = openpyxl.load_workbook(process_excel_path)
     active_sheet = excel_to_write.active
 
     # Processing folder
@@ -199,13 +196,28 @@ def process_folder_write_pdfs_data_to_excel(file_path, excel_save_path):
                 extracted_doc_code = extract_document_code(pdf_as_str)  # Extracting document code form PDF file
 
                 # Extracting product codes
-                pdf_tables = extract_product_codes(full_file_path)
-                for item in pdf_tables:
+                product_codes = extract_product_codes(full_file_path)
+
+                for item in product_codes:
                     print(item)
+
+                # Generating link to filename
+
+                # Write all items to excel
+                last_row = active_sheet.max_row + 1  # Finding last Excel row for each file.
+                for index, code in enumerate(product_codes, start=last_row):
+                    active_sheet.cell(row=index, column=1, value=code)  # Column 1: 12NC code
+                    active_sheet.cell(row=index, column=2, value=full_file_path)  # Column 2: Full path to file
+                    active_sheet.cell(row=index, column=3, value=extracted_doc_code)  # Column 3: Document code
+
+                # Move processed file to different location
                 print("========NEXT ITEM=======")
 
+    # Save the updated Excel file after processing
+    if excel_save_path is None:
+        excel_save_path = process_excel_path
+    excel_to_write.save(os.path.basename(excel_save_path))
     print(f"Number of processed pdf files: {num_of_pdfs}")
-    # create list of files inside a folder
 
 
 if __name__ == '__main__':
@@ -215,4 +227,5 @@ if __name__ == '__main__':
     # excel_file = r""  # Here type path to the Excel file (Necessary)
     # process_excel_and_pdfs(excel_file, pdf_link_prefix)
 
+    # process_folder_write_pdfs_data_to_excel()  # New feature
     pass
