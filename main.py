@@ -111,9 +111,10 @@ def extract_product_codes(pdf_path: str, column_candidates: list = ['12NC', '10N
         return []
 
 
-def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str = "", start_row: int = 2, end_row=None) -> list:
+def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str = "",
+                           start_row: int = 2, end_row=None, save_option: int = 2) -> list:
     """
-    Process the Excel file and for each row, extract data from the PDF linked in the Excel.
+    Process the Excel file and for each row, extract data from the PDF linked in the Excel and save based on user choice
     Write the extracted document code into the next column of the same row (column need to exist and have header).
     :param excel_file_path: Path to the Excel file.
     :param pdf_link_prefix: The prefix to be added to PDF links if they are partial.
@@ -159,12 +160,20 @@ def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str = "", star
                 unextracted_doc = (int(row[0].row), decoded_pdf_link)
                 logs.append(unextracted_doc)
 
-    # Save the updated Excel file after processing
-    wb_obj.save(f"updated_{os.path.basename(excel_file_path)}")
+    # Wybór formatu zapisu
+    if save_option == 1:  # Nadpisz istniejący plik
+        save_path = excel_file_path
+    else:  # Zapisz jako nowy plik z przedrostkiem
+        directory, filename = os.path.split(excel_file_path)
+        save_path = os.path.join(directory, f"updated_{filename}")
+
+    print(f"Saving file to: {save_path}")
+    wb_obj.save(save_path)
     return logs
 
 
-def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: str, excel_save_path: str = None):
+def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: str,
+                                            excel_save_path: str = None, save_option: int = 2):
     """Open folder read all pdf files in it, for each one extract data and write it to Excel file, after that move file.
 
 
@@ -205,11 +214,14 @@ def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: 
                 print("========NEXT ITEM=======")
 
     # Save the updated Excel file after processing
-    if excel_save_path is None:
-        excel_save_path = process_excel_path
-        print(f"Saving file at the location: {excel_save_path}")
-    excel_to_write.save(os.path.basename(excel_save_path))
-    print(f"Number of processed pdf files: {num_of_pdfs}")
+    if save_option == 1:  # Nadpisz istniejący plik
+        save_path = excel_save_path or process_excel_path
+    else:  # Zapisz jako nowy plik z przedrostkiem
+        directory, filename = os.path.split(process_excel_path)
+        save_path = os.path.join(directory, f"updated_{filename}")
+
+    print(f"Saving file to: {save_path}")
+    excel_to_write.save(save_path)
 
 
 if __name__ == '__main__':

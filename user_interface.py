@@ -36,8 +36,12 @@ def start_process() -> None:
     row_to_start = col_start_entry.get()
     row_to_stop = col_end_entry.get()
 
+    # Error catching 
     if not excel_path:
         messagebox.showerror("Error", "Excel file path is required.")
+        return
+    if row_to_start > row_to_stop:
+        messagebox.showerror("Error", "The starting row value must be less than the stop value.")
         return
 
     # Przygotowanie argumentów dla funkcji
@@ -49,6 +53,9 @@ def start_process() -> None:
         kwargs["start_row"] = int(row_to_start)
     if row_to_stop:
         kwargs["end_row"] = int(row_to_stop)
+
+    save_option = rb_value.get()
+    kwargs["save_option"] = save_option
 
     # Wywołanie funkcji z dynamicznie utworzonymi argumentami
     try:
@@ -82,6 +89,8 @@ def start_process_from_folder() -> None:
     kwargs["process_excel_path"] = excel_path
     if excel_path_to_save:
         kwargs["excel_save_path"] = excel_path_to_save
+    save_option = rb_value.get()
+    kwargs["save_option"] = save_option
 
     try:
         main.process_folder_write_pdfs_data_to_excel(**kwargs)
@@ -116,12 +125,12 @@ pdf_label.grid(row=1, column=0, sticky="w", pady=5)
 pdf_entry = ttk.Entry(excel_frame, width=50)
 pdf_entry.grid(row=1, column=1, pady=5)
 
-col_start_label = ttk.Label(excel_frame, text="Starting Column:")
+col_start_label = ttk.Label(excel_frame, text="Starting Row:")
 col_start_label.grid(row=2, column=0, sticky="w", pady=5)
 col_start_entry = ttk.Entry(excel_frame, width=50)
 col_start_entry.grid(row=2, column=1, pady=5)
 
-col_end_label = ttk.Label(excel_frame, text="Ending Column:")
+col_end_label = ttk.Label(excel_frame, text="Ending Row:")
 col_end_label.grid(row=3, column=0, sticky="w", pady=5)
 col_end_entry = ttk.Entry(excel_frame, width=50)
 col_end_entry.grid(row=3, column=1, pady=5)
