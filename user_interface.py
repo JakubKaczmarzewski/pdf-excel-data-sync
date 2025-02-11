@@ -94,6 +94,14 @@ main_window = tk.Tk()
 main_window.title("Process Excel and PDF")
 main_window.geometry('700x550')
 
+# Main window configure:
+main_window.rowconfigure(0, weight=1)
+main_window.rowconfigure(1, weight=1)
+main_window.rowconfigure(2, weight=1)
+
+main_window.columnconfigure(0, weight=1)
+main_window.columnconfigure(1, weight=1)
+
 # Frame: Process Excel Section
 excel_frame = ttk.LabelFrame(main_window, text="Process Excel and write Document codes", padding=(10, 10))
 excel_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
@@ -150,4 +158,21 @@ instruction_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
 instruction_button = ttk.Button(instruction_frame, text="How to Use", command=show_instruction)
 instruction_button.grid(row=0, column=0)
 
+# Saving option frame
+saving_option_frame = ttk.LabelFrame(main_window, text="Saving file options")
+saving_option_frame.grid(row=0, column=1, sticky='n', pady=10)
+
+rb_value = tk.IntVar()
+rb_value.set(2)
+
+# Radio save buttons
+overwrite_save_rb = ttk.Radiobutton(saving_option_frame, text='Overwrite file', value=1, variable=rb_value)
+overwrite_save_rb.grid(row=0, column=0, padx=5, pady=10)
+overwrite_save_rb = ttk.Radiobutton(saving_option_frame, text='Create updated copy', value=2, variable=rb_value)
+overwrite_save_rb.grid(row=0, column=1, padx=5, pady=10)
+
+if rb_value.get() == 2:
+    print("Value 2 ")
+elif rb_value.get() == 1:
+    print("Value 1")
 main_window.mainloop()

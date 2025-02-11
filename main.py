@@ -54,16 +54,6 @@ def read_pdf(pdf_path: str) -> str:
     return pdf_as_str
 
 
-def print_from_list(data) -> None:
-    """
-    Read all data from iterable.
-    :param data: Any iterable type.
-    :return: None.
-    """
-    for item in data:
-        print(item)
-
-
 def extract_document_code(text: str, search_pattern: list = ("Document No.:", "Internal Ref. Nr.:")) -> str:
     """
     Extract the document code that is preceded by a user-defined pattern
@@ -205,6 +195,7 @@ def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: 
 
                 # Write all items to excel
                 last_row = active_sheet.max_row + 1  # Finding last Excel row for each file.
+                print(f"Last row is {last_row}")
                 for index, code in enumerate(product_codes, start=last_row):
                     active_sheet.cell(row=index, column=1, value=code)  # Column 1: 12NC code
                     active_sheet.cell(row=index, column=2, value=full_file_path)  # Column 2: Full path to file
@@ -216,6 +207,7 @@ def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: 
     # Save the updated Excel file after processing
     if excel_save_path is None:
         excel_save_path = process_excel_path
+        print(f"Saving file at the location: {excel_save_path}")
     excel_to_write.save(os.path.basename(excel_save_path))
     print(f"Number of processed pdf files: {num_of_pdfs}")
 
