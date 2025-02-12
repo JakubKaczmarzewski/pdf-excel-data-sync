@@ -16,10 +16,22 @@ def create_full_path(path_prefix: str, filename: str) -> str:
     return full_path
 
 
-def move_file(file_name: str, path_to_move: str) -> None:
-    """Move file to different location."""
+def move_file(file_name: str, path_to_move: str) -> str:
+    """Move file to a different location and return the new path."""
 
-    pass
+    try:
+        # Creating new file if not exist
+        os.makedirs(path_to_move, exist_ok=True)
+
+        # Construct the new file path
+        new_file_path = os.path.join(path_to_move, os.path.basename(file_name))
+
+        os.rename(file_name, new_file_path)  # Moving file to new direction
+        return new_file_path
+
+    except Exception as e:
+        print(f"Error moving file {file_name} to {path_to_move}: {e}")
+        return
 
 
 def read_pdf(pdf_path: str) -> str:
@@ -120,6 +132,8 @@ def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str = "",
     :param pdf_link_prefix: The prefix to be added to PDF links if they are partial.
     :param start_row: Number of the row where program starts to process, value 2 by default.
     :param end_row: Number of the row where program ends, if not specified by user program process whole file.
+    :param save_option: Decide how to save Excel file after processing. 1 - overwrite exiting file 2 - create new file
+                        in same location as original file with `updated_` prefix.
     :return: Lists with numbers and file_names of unprocessed rows.
     """
     print(pdf_link_prefix)
@@ -173,10 +187,15 @@ def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str = "",
 
 
 def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: str,
-                                            excel_save_path: str = None, save_option: int = 2):
+                                            excel_save_path: str = None, save_option: int = 2,
+                                            move_to_folder: str = None):
     """Open folder read all pdf files in it, for each one extract data and write it to Excel file, after that move file.
 
-
+    :param file_path: Folder containing PDF files to process.
+    :param process_excel_path: Path to the Excel file for writing data.
+    :param excel_save_path: Path for saving the updated Excel file.
+    :param save_option: Option to save Excel: 1 - overwrite, 2 - save with updated_ prefix.
+    :param move_to_folder: Destination folder for processed PDF files.
     """
     #  Load Excel file to write data
     process_excel_path = unquote(process_excel_path)
@@ -184,13 +203,12 @@ def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: 
     active_sheet = excel_to_write.active
 
     # Processing folder
-    num_of_pdfs = 0
+    num_of_processed_pdfs = 0
     for filename in os.listdir(file_path):
         if filename.endswith(".pdf"):
             full_file_path = create_full_path(file_path, filename)
             if os.path.isfile(full_file_path):
                 print(f"Processing file: {full_file_path}")
-                num_of_pdfs += 1
                 pdf_as_str = read_pdf(full_file_path)
                 extracted_doc_code = extract_document_code(pdf_as_str)  # Extracting document code form PDF file
 
@@ -200,14 +218,21 @@ def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: 
                 for item in product_codes:
                     print(item)
 
-                # Generating link to filename
+                if len(product_codes) >= 1:
+                    num_of_processed_pdfs += 1
+                    # Generating link to filename
+                    new_file_path = move_file(full_file_path, move_to_folder) if move_to_folder else full_file_path
 
                 # Write all items to excel
                 last_row = active_sheet.max_row + 1  # Finding last Excel row for each file.
                 print(f"Last row is {last_row}")
                 for index, code in enumerate(product_codes, start=last_row):
                     active_sheet.cell(row=index, column=1, value=code)  # Column 1: 12NC code
-                    active_sheet.cell(row=index, column=2, value=full_file_path)  # Column 2: Full path to file
+
+                    active_sheet.cell(row=index, column=2, value=filename)  # Column 2: Full path to file
+                    active_sheet.cell(row=index, column=2).hyperlink = new_file_path  # Format cell to link
+                    active_sheet.cell(row=index, column=2).style = 'Hyperlink'  # Adding link color
+
                     active_sheet.cell(row=index, column=3, value=extracted_doc_code)  # Column 3: Document code
 
                 # Move processed file to different location
@@ -222,6 +247,7 @@ def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: 
 
     print(f"Saving file to: {save_path}")
     excel_to_write.save(save_path)
+    print(num_of_processed_pdfs)
 
 
 if __name__ == '__main__':

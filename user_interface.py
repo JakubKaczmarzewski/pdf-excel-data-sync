@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter import scrolledtext
 import main
 
 
@@ -10,18 +11,89 @@ def show_instruction() -> None:
     :return: None
     """
     instruction_text = """
-    Program User Manual:
-
-    1.Enter the full path to the Excel file you want to process.
-    2.If Excel file contain hyperlink enter prefix of full path to the directory containing the PDF files.
-    3. Enter the number of the row you want to start from. If you want to start from the second row leave this empty.
-    4. Enter the number of the column where you want to stop processing. If you want to process whole file, 
-    leave this empty.
-    5.Click 'Start' to begin processing the files.
-    The program reads data from the Excel file, extract text from PDF combines it
-    and saves the results in a new Excel file.
+    User Manual for the Program:
+    
+    1) Process PDF Files and Write Data to Excel:
+    --------------------------------------------------
+    **About this functionality:**
+    This feature processes all PDF files from a specified folder. For each file, it extracts **Product Codes** and a **Document Number**, then moves the file to a user-defined location or a default "After Processed" folder. Each processed file is logged in the Excel sheet with its Hyperlink and Document Number alongside corresponding Product Codes.
+    
+    **Steps to use this functionality:**
+    1.1 In the **`File Path`** field, paste the absolute path to the folder containing the PDF files you want to process.
+        Example:
+        `C:\\Users\\User123\\Desktop\Folder_with_my_pdfs`
+    
+    1.2 In the **`Path to Excel to process`** field, provide the absolute path to the Excel file to be updated.
+        Example:
+        `C:\\Users\\User123\\Desktop\excel_file.xlsx`
+    
+    1.3 In the **`Path to save Excel changes`** field, specify the folder where you want the modified Excel file to be saved.
+        - If left empty, the changes will be saved in the same directory as the original Excel file.
+    
+    1.4 In the **`Path to save processed PDF's`** field, specify the absolute path to the folder where successfully processed files should be stored.
+        Example:
+        `C:\\Users\\User123\\Desktop\\Processed_PDFs`
+        **Note:** If you want to use the default location, leave this field empty.
+    
+    1.5 In the **`Excel saving file options`**, select one of the following:
+        - **Overwrite a file:** Saves changes to the same Excel file, replacing the previous version. **Warning:** This will overwrite the original file.
+        - **Create updated copy (default):** Saves the updated Excel file with the prefix `updated_` in the same location as the original.
+          Example:
+          Original file: `C:\\Users\\User123\\Desktop\\excel_file.xlsx`
+          Updated file: `C:\\Users\\User123\\Desktop\\updated_excel_file.xlsx`
+    
+    1.6 Click the **`Start Processing`** button to run the program. The processing time will vary depending on the number of files. Once completed, a notification window will display the program's status.
+    
+    --------------------------------------------------
+    
+    2) Process Excel and Write Document Codes:
+    --------------------------------------------------
+    **About this functionality:**
+    This feature reads data from an Excel file, extracts text from related PDF files, and writes the results back into the Excel file.
+    
+    **Steps to use this functionality:**
+    2.1 In the **`Path to Excel to process`** field, enter the full path to the Excel file you want to update.
+    
+    2.2 If the Excel file contains hyperlinks to PDF files, provide the base path (prefix) to the folder containing the PDF files in the **`PDF File Path Prefix`** field.
+    
+    2.3 In the **`Starting Row`** field, enter the row number where processing should begin.
+        - Leave this empty to start from the second row (default).
+    
+    2.4 In the **`Stopping Column`** field, enter the column number where processing should end.
+        - Leave this empty to process the entire file.
+    
+    2.5 Click the **`Start`** button to begin processing. Once finished, the program will display a status message.
+    
+    --------------------------------------------------
+    
+    **Tips for Success:**
+    - Always provide absolute paths to avoid errors.
+    - Ensure the Excel file is closed before starting the program.
+    - Use the "Create updated copy" option to preserve your original files.
+    
+    Thank you for using my program!
     """
-    messagebox.showinfo("How to use this app", instruction_text)
+    # Create a new top-level window
+    manual_window = tk.Toplevel()
+    manual_window.title("User Manual")
+
+    # Set minimum size and center it on the screen
+    manual_window.geometry("600x400")
+    manual_window.resizable(True, True)
+
+    # Create a scrolled text widget
+    text_area = scrolledtext.ScrolledText(manual_window, wrap=tk.WORD, font=("Arial", 10))
+    text_area.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    # Insert the manual text
+    text_area.insert(tk.END, instruction_text)
+
+    # Make the text area read-only
+    text_area.config(state=tk.DISABLED)
+
+    # Add a close button
+    close_button = tk.Button(manual_window, text="Close", command=manual_window.destroy)
+    close_button.pack(pady=10)
 
 
 def start_process() -> None:
@@ -36,13 +108,13 @@ def start_process() -> None:
     row_to_start = col_start_entry.get()
     row_to_stop = col_end_entry.get()
 
-    # Error catching 
+    # Error catching
     if not excel_path:
         messagebox.showerror("Error", "Excel file path is required.")
         return
-    if row_to_start > row_to_stop:
-        messagebox.showerror("Error", "The starting row value must be less than the stop value.")
-        return
+    # if row_to_start > row_to_stop:
+    #     messagebox.showerror("Error", "The starting row value must be less than the stop value.")
+    #     return
 
     # Przygotowanie argumentów dla funkcji
     kwargs = {"excel_file_path": excel_path}
@@ -71,6 +143,7 @@ def start_process_from_folder() -> None:
     folder_path = file_path_entry.get()
     excel_path = process_excel_entry.get()
     excel_path_to_save = save_excel_entry.get()
+    pdfs_folder_path_to_save = save_file_entry.get()
 
     if not folder_path and not excel_path:
         messagebox.showerror("Error", "Folder path and Excel file path are required.")
@@ -91,6 +164,8 @@ def start_process_from_folder() -> None:
         kwargs["excel_save_path"] = excel_path_to_save
     save_option = rb_value.get()
     kwargs["save_option"] = save_option
+    if save_file_entry:
+        kwargs["move_to_folder"] = pdfs_folder_path_to_save
 
     try:
         main.process_folder_write_pdfs_data_to_excel(**kwargs)
@@ -100,7 +175,7 @@ def start_process_from_folder() -> None:
 
 
 main_window = tk.Tk()
-main_window.title("Process Excel and PDF")
+main_window.title("Process Excel and PDF v1.0")
 main_window.geometry('700x550')
 
 # Main window configure:
@@ -113,7 +188,7 @@ main_window.columnconfigure(1, weight=1)
 
 # Frame: Process Excel Section
 excel_frame = ttk.LabelFrame(main_window, text="Process Excel and write Document codes", padding=(10, 10))
-excel_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+excel_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
 
 excel_label = ttk.Label(excel_frame, text="Excel File Path:")
 excel_label.grid(row=0, column=0, sticky="w", pady=5)
@@ -140,25 +215,30 @@ run_button.grid(row=4, column=0, columnspan=2, pady=10, sticky='w')
 
 # Frame: Process File Section
 file_frame = ttk.LabelFrame(main_window, text="Process from file and write all data to Excel", padding=(10, 10))
-file_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+file_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
 file_path_label = ttk.Label(file_frame, text="File Path:")
 file_path_label.grid(row=0, column=0, sticky="w", pady=5)
 file_path_entry = ttk.Entry(file_frame, width=50)
 file_path_entry.grid(row=0, column=1, pady=5)
 
-process_excel_label = ttk.Label(file_frame, text="Path to Excel to \n process:")
+process_excel_label = ttk.Label(file_frame, text="Path to Excel to \nprocess:")
 process_excel_label.grid(row=1, column=0, sticky="w", pady=5)
 process_excel_entry = ttk.Entry(file_frame, width=50)
 process_excel_entry.grid(row=1, column=1, pady=5)
 
-save_excel_label = ttk.Label(file_frame, text="Path to save\n Excel changes:")
+save_excel_label = ttk.Label(file_frame, text="Path to save\nExcel changes:")
 save_excel_label.grid(row=2, column=0, sticky="w", pady=5)
 save_excel_entry = ttk.Entry(file_frame, width=50)
 save_excel_entry.grid(row=2, column=1, pady=5)
 
+save_file_label = ttk.Label(file_frame, text="Path to save\nprocessed PDF's.")
+save_file_label.grid(row=3, column=0, sticky='w', pady=5)
+save_file_entry = ttk.Entry(file_frame, width=50)
+save_file_entry.grid(row=3, column=1, columnspan=2, pady=10, sticky='w')
+
 file_run_button = ttk.Button(file_frame, text="Start Processing", command=start_process_from_folder)
-file_run_button.grid(row=3, column=0, columnspan=2, pady=10, sticky='w')
+file_run_button.grid(row=4, column=0, columnspan=2, pady=10, sticky='w')
 
 # Instruction frame
 instruction_frame = ttk.LabelFrame(main_window, text="Instruction", padding=(10, 10))
@@ -180,8 +260,4 @@ overwrite_save_rb.grid(row=0, column=0, padx=5, pady=10)
 overwrite_save_rb = ttk.Radiobutton(saving_option_frame, text='Create updated copy', value=2, variable=rb_value)
 overwrite_save_rb.grid(row=0, column=1, padx=5, pady=10)
 
-if rb_value.get() == 2:
-    print("Value 2 ")
-elif rb_value.get() == 1:
-    print("Value 1")
 main_window.mainloop()
