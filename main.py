@@ -88,7 +88,7 @@ def extract_document_code(text: str, search_pattern: list = ("Document No.:", "I
     return None
 
 
-def extract_product_codes(pdf_path: str, column_candidates: list = ['12NC', '10NC', 'Product Code', 'Model']) -> list:
+def extract_product_codes(pdf_path: str, column_candidates: list = ['12NC', '10NC', 'Product Code', 'Model', 'Material']) -> list:
     """
     Look for tables in a PDF file and extract product codes from the specified column.
 
@@ -121,6 +121,13 @@ def extract_product_codes(pdf_path: str, column_candidates: list = ['12NC', '10N
     except Exception as e:
         print(f"An error occurred while processing the PDF: {e}")
         return []
+
+
+def generate_path_to_disk_folder(file_name,
+                                 path_prefix: str = r'X:\TWWT-Box1\Obsługa celna\CE\Dokumenty') -> str:
+    generated_path = os.path.join(path_prefix, os.path.basename(file_name))
+    print(generated_path)
+    return generated_path
 
 
 def process_excel_and_pdfs(excel_file_path: str, pdf_link_prefix: str = "",
@@ -223,6 +230,8 @@ def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: 
                     # Generating link to filename
                     new_file_path = move_file(full_file_path, move_to_folder) if move_to_folder else full_file_path
 
+                    file_on_disk_path = generate_path_to_disk_folder(filename)
+
                 # Write all items to excel
                 last_row = active_sheet.max_row + 1  # Finding last Excel row for each file.
                 print(f"Last row is {last_row}")
@@ -230,7 +239,8 @@ def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: 
                     active_sheet.cell(row=index, column=1, value=code)  # Column 1: 12NC code
 
                     active_sheet.cell(row=index, column=2, value=filename)  # Column 2: Full path to file
-                    active_sheet.cell(row=index, column=2).hyperlink = new_file_path  # Format cell to link
+                    # active_sheet.cell(row=index, column=2).hyperlink = new_file_path  # Format cell to link
+                    active_sheet.cell(row=index, column=2).hyperlink = file_on_disk_path  # Format cell to link
                     active_sheet.cell(row=index, column=2).style = 'Hyperlink'  # Adding link color
 
                     active_sheet.cell(row=index, column=3, value=extracted_doc_code)  # Column 3: Document code
@@ -252,10 +262,19 @@ def process_folder_write_pdfs_data_to_excel(file_path: str, process_excel_path: 
 
 if __name__ == '__main__':
     # Main task
+    pass
 
     # pdf_link_prefix = r""  # Here type PDF prefix file if needed
     # excel_file = r""  # Here type path to the Excel file (Necessary)
     # process_excel_and_pdfs(excel_file, pdf_link_prefix)
 
-    # process_folder_write_pdfs_data_to_excel()  # New feature
-    pass
+    # ===============   Local ==============================
+
+    # folder = r''
+    # excel_file = r''
+    # finished_folder = r''
+    #
+    # process_folder_write_pdfs_data_to_excel(file_path=folder, process_excel_path=excel_file,
+    #                                         move_to_folder=finished_folder, save_option=1)
+
+
